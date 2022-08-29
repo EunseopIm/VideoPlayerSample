@@ -1,9 +1,14 @@
 package com.eee.videoapp
 
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.eee.videoapp.databinding.ActivityMainBinding
+import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.PlaybackException
+import com.google.android.exoplayer2.Player
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
@@ -11,6 +16,12 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.You
 import java.util.regex.*
 
 class MainActivity : AppCompatActivity() {
+
+    // Single Exoplayer
+    private var autoPlay = false
+    private val currentWindow = 0
+    private val playbackPosition = 0L
+    private var exoPlayer: ExoPlayer? = null
 
     private val binding: ActivityMainBinding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
@@ -22,6 +33,34 @@ class MainActivity : AppCompatActivity() {
 
         // 유튜브 플레이어
         initYoutubePlayer()
+
+        // ExoPlayer
+        initExoPlayer()
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        if (autoPlay) {
+            exoPlayer?.let { it.playWhenReady = true }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        if (isPlaying()) {
+
+            exoPlayer?.let { it.playWhenReady = false }
+            autoPlay = true
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        // 종료시 release
+        releasePlayer()
     }
 
     /**
@@ -76,5 +115,74 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         })
+    }
+
+    /**
+     * ExoPlayer 초기화
+     */
+    private fun initExoPlayer() {
+
+        binding.exoView.useController = true
+
+        exoPlayer = ExoPlayer.Builder(this).build()
+
+        exoPlayer?.let {
+
+            binding.exoView.player = it
+
+            it.addListener(object : Player.Listener {
+
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    super.onPlaybackStateChanged(playbackState)
+
+                    // 영상 종료 시
+                    if (playbackState == Player.STATE_ENDED) {
+
+                        Toast.makeText(this@MainActivity, "ExoPlayer - Player.STATE_ENDED", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                override fun onIsPlayingChanged(isPlaying: Boolean) {
+                    super.onIsPlayingChanged(isPlaying)
+
+                    if (isPlaying) {
+                        // Active playback.
+                    } else {
+                        // Not playing because playback is paused, ended, suppressed, or the player
+                        // is buffering, stopped or failed. Check player.getPlayWhenReady,
+                        // player.getPlaybackState, player.getPlaybackSuppressionReason and
+                        // player.getPlaybackError for details.
+                    }
+                }
+
+                override fun onPlayerError(error: PlaybackException) {
+                    super.onPlayerError(error)
+                }
+            })
+
+            // url 정보 세팅
+            val targetURL = "https://youtu.be/OCiUWfFz9Mc"
+            val uri = Uri.parse(targetURL)
+            val mediaItem = MediaItem.fromUri(uri)
+            it.setMediaItem(mediaItem)
+
+            it.prepare()
+            it.play()
+        }
+    }
+
+    private fun releasePlayer() {
+        exoPlayer?.release()
+        exoPlayer = null
+    }
+
+    private fun isPlaying(): Boolean {
+
+        var result = false
+        exoPlayer?.let {
+            result = it.playbackState == Player.STATE_READY && it.playWhenReady
+        }
+
+        return result
     }
 }
