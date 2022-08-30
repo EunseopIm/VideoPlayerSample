@@ -108,7 +108,10 @@ class MainActivity : AppCompatActivity() {
         binding.youtubeView.addYouTubePlayerListener(object: YouTubePlayerListener {
 
             override fun onApiChange(youTubePlayer: YouTubePlayer) {}
-            override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {}
+            override fun onCurrentSecond(youTubePlayer: YouTubePlayer, second: Float) {
+
+                //Log.v(">>>" , "YoutubePlayer - second($second)")
+            }
             override fun onError(youTubePlayer: YouTubePlayer, error: PlayerConstants.PlayerError) {}
             override fun onPlaybackQualityChange(youTubePlayer: YouTubePlayer, playbackQuality: PlayerConstants.PlaybackQuality) {}
             override fun onPlaybackRateChange(youTubePlayer: YouTubePlayer, playbackRate: PlayerConstants.PlaybackRate) {}
@@ -170,6 +173,7 @@ class MainActivity : AppCompatActivity() {
             })
 
             // url 정보 세팅
+            //val targetURL = "http://playertest.longtailvideo.com/adaptive/wowzaid3/playlist.m3u8"
             val targetURL = "https://youtu.be/OCiUWfFz9Mc"
             val uri = Uri.parse(targetURL)
             val mediaItem = MediaItem.fromUri(uri)
