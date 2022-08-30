@@ -50,4 +50,7 @@ dependencies {
     // Exo Video Player Library
     implementation 'com.google.android.exoplayer:exoplayer-core:2.18.1'
     implementation 'com.google.android.exoplayer:exoplayer-ui:2.18.1'
+
+    // Vimeo Player Library
+    implementation 'com.ct7ct7ct7.androidvimeoplayer:library:1.2.2'
 }
