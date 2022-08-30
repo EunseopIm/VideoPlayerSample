@@ -1,10 +1,8 @@
 package com.eee.videoapp
 
-import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.ct7ct7ct7.androidvimeoplayer.listeners.VimeoPlayerReadyListener
@@ -173,8 +171,7 @@ class MainActivity : AppCompatActivity() {
             })
 
             // url 정보 세팅
-            //val targetURL = "http://playertest.longtailvideo.com/adaptive/wowzaid3/playlist.m3u8"
-            val targetURL = "https://youtu.be/OCiUWfFz9Mc"
+            val targetURL = "https://assets.afcdn.com/video49/20210722/v_645516.m3u8"
             val uri = Uri.parse(targetURL)
             val mediaItem = MediaItem.fromUri(uri)
             it.setMediaItem(mediaItem)
