@@ -1,6 +1,5 @@
 package com.eee.videoapp
 
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -13,11 +12,13 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.PlaybackException
 import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.upstream.RawResourceDataSource
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.YouTubePlayerListener
 import java.util.regex.*
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -170,10 +171,17 @@ class MainActivity : AppCompatActivity() {
                 }
             })
 
-            // url 정보 세팅
-            val targetURL = "https://assets.afcdn.com/video49/20210722/v_645516.m3u8"
+            // Video - url 정보 세팅
+            /*val targetURL = "https://assets.afcdn.com/video49/20210722/v_645516.m3u8"
             val uri = Uri.parse(targetURL)
             val mediaItem = MediaItem.fromUri(uri)
+            it.setMediaItem(mediaItem)*/
+
+            // Audio
+            //"beethoven_trio_s", "carnival_night_s", "einsam_island_s", "ravel_trio_s"
+            val musicID = this.resources.getIdentifier("beethoven_trio_s", "raw", this.packageName)
+            val musicUri = RawResourceDataSource.buildRawResourceUri(musicID)
+            val mediaItem = MediaItem.fromUri(musicUri)
             it.setMediaItem(mediaItem)
 
             it.prepare()
@@ -228,7 +236,7 @@ class MainActivity : AppCompatActivity() {
             override fun onReady(
                 title: String?,
                 duration: Float,
-                textTrackArray: Array<TextTrack>
+                textTrackArray: Array<TextTrack>,
             ) {
                 Log.v(">>>", "Vimeo Ready Listener : onReady")
             }
