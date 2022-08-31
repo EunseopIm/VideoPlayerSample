@@ -1,8 +1,10 @@
 package com.eee.videoapp
 
 import android.media.MediaPlayer
+import android.media.MediaPlayer.create
 import android.os.Bundle
 import android.util.Log
+import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.ct7ct7ct7.androidvimeoplayer.listeners.VimeoPlayerReadyListener
@@ -30,7 +32,7 @@ class MainActivity : AppCompatActivity() {
     private var exoPlayer: ExoPlayer? = null
 
     // Media Player
-    private val mediaPlayer: MediaPlayer? = null
+    private var mediaPlayer: MediaPlayer? = null
 
     private val binding: ActivityMainBinding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
@@ -41,13 +43,16 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         // Youtube
-        initYoutubePlayer()
+        //initYoutubePlayer()
 
         // ExoPlayer
         initExoPlayer()
 
         // Vimeo
-        initVimeoPlayer()
+        //initVimeoPlayer()
+
+        // MediaPlayer
+        initMediaPlayer()
     }
 
     override fun onResume() {
@@ -183,7 +188,7 @@ class MainActivity : AppCompatActivity() {
 
             // Audio
             val mediaItems: ArrayList<MediaItem> = arrayListOf()
-            val titleList = arrayListOf<String>("beethoven_trio_s", "carnival_night_s", "einsam_island_s", "ravel_trio_s")
+            val titleList = arrayListOf("beethoven_trio_s", "carnival_night_s", "einsam_island_s", "ravel_trio_s")
             for (title in titleList) {
 
                 val musicID = this.resources.getIdentifier(title, "raw", this.packageName)
@@ -194,7 +199,7 @@ class MainActivity : AppCompatActivity() {
             it.setMediaItems(mediaItems)
 
             it.prepare()
-            it.play()
+            //it.play()
         }
     }
 
@@ -323,6 +328,42 @@ class MainActivity : AppCompatActivity() {
      */
     private fun initMediaPlayer() {
 
+        mediaPlayer = create(this, R.raw.beethoven_trio_s)
+
+        binding.btnPrev.setOnClickListener {
+
+            Log.v(">>>", "Duration : ${mediaPlayer?.duration}")
+            Log.v(">>>", "CurrentPosition : ${mediaPlayer?.currentPosition}")
+        }
+        binding.btnNext.setOnClickListener {
+
+        }
+
+        // Play 버튼
+        binding.btnPlay.setOnClickListener {
+
+            val isPlay = mediaPlayer?.isPlaying?: false
+            if (isPlay) {
+                mediaPlayer?.pause()
+                binding.btnPlay.text = "Play"
+            } else {
+                mediaPlayer?.start()
+                binding.btnPlay.text = "Pause"
+            }
+        }
+
+        val duration = mediaPlayer?.duration?: 0
+        binding.seekBar.max = duration
+        binding.seekBar.setOnSeekBarChangeListener(object :SeekBar.OnSeekBarChangeListener {
+
+            override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
+                mediaPlayer?.seekTo(p1)
+            }
+
+            override fun onStartTrackingTouch(p0: SeekBar?) {}
+
+            override fun onStopTrackingTouch(p0: SeekBar?) {}
+        })
     }
 
 }
