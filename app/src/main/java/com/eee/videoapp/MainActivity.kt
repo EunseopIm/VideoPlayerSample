@@ -1,5 +1,6 @@
 package com.eee.videoapp
 
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -27,6 +28,9 @@ class MainActivity : AppCompatActivity() {
     private val currentWindow = 0
     private val playbackPosition = 0L
     private var exoPlayer: ExoPlayer? = null
+
+    // Media Player
+    private val mediaPlayer: MediaPlayer? = null
 
     private val binding: ActivityMainBinding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
@@ -178,11 +182,16 @@ class MainActivity : AppCompatActivity() {
             it.setMediaItem(mediaItem)*/
 
             // Audio
-            //"beethoven_trio_s", "carnival_night_s", "einsam_island_s", "ravel_trio_s"
-            val musicID = this.resources.getIdentifier("beethoven_trio_s", "raw", this.packageName)
-            val musicUri = RawResourceDataSource.buildRawResourceUri(musicID)
-            val mediaItem = MediaItem.fromUri(musicUri)
-            it.setMediaItem(mediaItem)
+            val mediaItems: ArrayList<MediaItem> = arrayListOf()
+            val titleList = arrayListOf<String>("beethoven_trio_s", "carnival_night_s", "einsam_island_s", "ravel_trio_s")
+            for (title in titleList) {
+
+                val musicID = this.resources.getIdentifier(title, "raw", this.packageName)
+                val musicUri = RawResourceDataSource.buildRawResourceUri(musicID)
+                val mediaItem = MediaItem.fromUri(musicUri)
+                mediaItems.add(mediaItem)
+            }
+            it.setMediaItems(mediaItems)
 
             it.prepare()
             it.play()
@@ -307,6 +316,13 @@ class MainActivity : AppCompatActivity() {
         binding.colorButton.setOnClickListener {
             binding.vimeoPlayerView.topicColor = Color.GREEN
         }*/
+    }
+
+    /**
+     * MediaPlayer
+     */
+    private fun initMediaPlayer() {
+
     }
 
 }
