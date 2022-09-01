@@ -20,6 +20,10 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstan
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.YouTubePlayerListener
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.regex.*
 
 
@@ -34,6 +38,10 @@ class MainActivity : AppCompatActivity() {
     // Media Player
     private var mediaPlayer: MediaPlayer? = null
 
+    // 타이머 관련
+    private var timer: Job? = null
+    private var interval = 1 * 100L
+
     private val binding: ActivityMainBinding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
     }
@@ -43,13 +51,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         // Youtube
-        //initYoutubePlayer()
+        initYoutubePlayer()
 
         // ExoPlayer
         initExoPlayer()
 
         // Vimeo
-        //initVimeoPlayer()
+        initVimeoPlayer()
 
         // MediaPlayer
         initMediaPlayer()
@@ -77,7 +85,15 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
 
         // 종료시 release
-        releasePlayer()
+        releaseExoPlayer()
+
+        // 미디어 플레이어 release
+        mediaPlayer?.release()
+        mediaPlayer = null
+
+        // timer cancel
+        timer?.cancel()
+        timer = null
     }
 
     /**
@@ -206,7 +222,7 @@ class MainActivity : AppCompatActivity() {
     /**
      * ExoPlayer - releasePlayer
      */
-    private fun releasePlayer() {
+    private fun releaseExoPlayer() {
         exoPlayer?.release()
         exoPlayer = null
     }
@@ -330,40 +346,64 @@ class MainActivity : AppCompatActivity() {
 
         mediaPlayer = create(this, R.raw.beethoven_trio_s)
 
-        binding.btnPrev.setOnClickListener {
-
-            Log.v(">>>", "Duration : ${mediaPlayer?.duration}")
-            Log.v(">>>", "CurrentPosition : ${mediaPlayer?.currentPosition}")
-        }
-        binding.btnNext.setOnClickListener {
-
-        }
-
         // Play 버튼
         binding.btnPlay.setOnClickListener {
 
             val isPlay = mediaPlayer?.isPlaying?: false
             if (isPlay) {
+
                 mediaPlayer?.pause()
+                stopTimer()
                 binding.btnPlay.text = "Play"
+
             } else {
+
                 mediaPlayer?.start()
+                startTimer()
                 binding.btnPlay.text = "Pause"
             }
         }
 
         val duration = mediaPlayer?.duration?: 0
         binding.seekBar.max = duration
-        binding.seekBar.setOnSeekBarChangeListener(object :SeekBar.OnSeekBarChangeListener {
+        binding.seekBar.setOnSeekBarChangeListener(seekbarChangeListener)
+    }
 
-            override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
-                mediaPlayer?.seekTo(p1)
-            }
+    private val seekbarChangeListener = object :SeekBar.OnSeekBarChangeListener {
 
-            override fun onStartTrackingTouch(p0: SeekBar?) {}
+        override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
 
-            override fun onStopTrackingTouch(p0: SeekBar?) {}
-        })
+            mediaPlayer?.seekTo(p1)
+
+        }
+
+        override fun onStartTrackingTouch(p0: SeekBar?) {
+            stopTimer()
+        }
+
+        override fun onStopTrackingTouch(p0: SeekBar?) {
+            startTimer()
+        }
+    }
+
+    private fun startTimer() {
+
+        timer?.cancel()
+        timer = MainScope().launch {
+
+            delay(interval)
+
+            binding.seekBar.setOnSeekBarChangeListener(null)
+            binding.seekBar.progress = mediaPlayer?.currentPosition?: 0
+            binding.seekBar.setOnSeekBarChangeListener(seekbarChangeListener)
+
+            startTimer()
+        }
+    }
+
+    private fun stopTimer() {
+
+        timer?.cancel()
     }
 
 }
